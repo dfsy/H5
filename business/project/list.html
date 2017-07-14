@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<script src='../../js/mui.min.js'></script>
+		<script src='../../js/jquery-3.2.1.min.js'></script>
+		<script src='../../js/WJP/control.js'></script>
+		<script src='../../js/WJP/common.js'></script>
+		<script src='../../js/WJP/Init.js'></script>
+		<script src='../../js/encrypt/tripledes.js'></script>
+		<script src='../../js/encrypt/mode-ecb.js'></script>
+		<script src="../../js/mui.picker.all.js"></script>
+		<link href='../../css/mui.min.css' rel='stylesheet' />
+		<link href='../../css/style.css' rel='stylesheet' />
+		<link href="../../css/mui.picker.min.css" rel="stylesheet" />
+	</head>
+	<style>
+		.mui-popover {
+			height: 60%;
+			width: 97%;
+			background-color: white;
+		}
+	</style>
+	<script>
+		mui.plusReady(function() {
+			$("#datatablePanel").datagrid({
+				url: WJP.Static.CrmURL + 'GetProjects',
+				data: {
+					page: 1,
+					rows: 12,
+					UserID: 11
+				},
+				columns: [{
+						title: '项目编号',
+						field: 'Code',
+						width: '80px'
+					},
+					{
+						title: '项目名称',
+						field: 'ProjectName',
+						DencryptKey: WJP.Static.EncryptKey,
+						isDencrypt: true
+					},
+					{
+						title: '销员',
+						field: 'UserName',
+						width: '55px'
+					},
+					{
+						title: '总额',
+						field: 'TotalMoney',
+						width: '50px'
+					},
+					{
+						title: '状态',
+						field: 'ProjectSatusName',
+						width: '55px'
+					}
+				],
+				pagination: true, //是否分页
+				rownumbers: false, //是否显示行号  
+				waitMsg: '正在处理中......',
+				idField: 'id',
+				rowsClick: function(row) {
+					mui.openWindow({
+						url: 'info.html',
+						id: 'business-project-info.html',
+						createNew: false,
+						extras: {
+							type: 1,
+							row: row
+						}
+					});
+				}
+			});
+			$('#searchDataGrid').on('click', function() {
+				mui('.mui-popover').popover('hide');
+				WJP.form.search({
+					$form: $('#searchForm'),
+					$datagrid: $("#datatablePanel")
+				});
+			});
+			$('#resetDataGrid').click(function() {
+				mui('.mui-popover').popover('hide');
+				WJP.form.reset({
+					$form: $('#searchForm')
+				});
+
+				WJP.form.search({
+					$form: $('#searchForm'),
+					$datagrid: $("#datatablePanel")
+				});
+			})
+			$('#cancelSearch').click(function() {
+				mui('.mui-popover').popover('hide');
+			});
+			$('div[name="ProvinceAreaID"]').selecter({
+				url: WJP.Static.CrmURL + 'GetProvince'
+			});
+
+			$('div[name="ProjectSatus"]').selecter({
+				data: WJP.BaseData.GetBaseType(31)
+			});
+
+			$('div[name="ProjectType"]').selecter({
+				data: WJP.BaseData.GetBaseType(27)
+			});
+
+			$('div[name="ProjectArea"]').selecter({
+				data: WJP.BaseData.GetBaseType(11)
+			});
+
+			mui('.mui-scroll-wrapper').scroll();
+			$('#addInfo').on('tap', function() {
+				mui.openWindow({
+					url: 'info.html',
+					id: 'business-project-info.html',
+					createNew: false,
+					extras: {
+						type: 0
+					}
+				});
+			});
+			$('#DoBack').on('tap', function() {
+				var webView = plus.webview.getTopWebview();
+				webView.close();
+			});
+		});
+	</script>
+
+	<body>
+		<div>
+			<header id="header" class="mui-bar wjp-bar-nav">
+				<a class="mui-icon mui-icon-undo" id='DoBack'></a>
+				<h1 id='navTitle' class="mui-title">项目管理</h1>
+				<a id='addInfo' style="font-size:38px;padding-top:2px;" class="mui-icon mui-icon-plusempty mui-pull-right"></a>
+				<a class="mui-icon mui-icon-search mui-pull-right" href="#topPopover"></a>
+			</header>
+			<div id="topPopover" class="mui-popover mui-scroll-wrapper">
+				<div class="mui-scroll">
+					<form style="overflow: auto;" id='searchForm' class="mui-scroll mui-input-group">
+						<div class="mui-input-row">
+							<input name="Code" type="text" class="mui-input-clear wjpinput" placeholder="搜索项目编号">
+						</div>
+						<div class="mui-input-row">
+							<input name="UserName" type="text" class="mui-input-clear wjpinput" placeholder="搜索销员">
+						</div>
+						<div class="mui-input-row">
+							<div name='ProvinceAreaID'>请选择地区</div>
+						</div>
+						<div class="mui-input-row">
+							<div name='ProjectSatus'>请选择项目状态</div>
+						</div>
+						<div class="mui-input-row">
+							<div name='ProjectType'>请选择项目类型</div>
+						</div>
+						<div>
+							<div name='ProjectArea'>请选择区域经理</div>
+						</div>
+					</form>
+					<div style="padding-top: 20px;text-align: center;width: 100%;">
+						<button id='searchDataGrid' class="mui-btn mui-btn-primary mui-icon mui-icon-search" type="button">搜 索</button>&nbsp;&nbsp;
+						<button id='resetDataGrid' class="mui-btn mui-btn-primary mui-icon mui-icon-refreshempty" type="button">清 除</button>&nbsp;&nbsp;
+						<button id='cancelSearch' class="mui-btn mui-btn-warning mui-icon  mui-icon-closeempty" type="button">关 闭</button>
+					</div>
+				</div>
+			</div>
+
+			<div id='datatablePanel' class="wjp-scroll-wrapper">
+
+			</div>
+		</div>
+	</body>
+
+</html>

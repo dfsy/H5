@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<!--<script src="js/mui.min.js"></script>
+		<script src="js/jquery-3.0.0.min.js"></script>
+		<script src="js/WJP/common.js"></script>
+		<script src="js/WJP/Init.js"></script>-->
+		<script src="js/WJP/PageJS.js"></script>
+		<style>
+			html,
+			body {
+				width: 100%;
+				height: 100%;
+			}
+			
+			.loginBG {
+				background: url('images/project/bg_login.jpg') center center no-repeat;
+				filter: "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale')";
+				-moz-background-size: 100% 100%;
+				background-size: 100% 100%;
+			}
+		</style>
+		<script type="text/javascript" charset="utf-8">
+			mui.plusReady(function() {
+				WJP.BaseData.SetAddress();
+				WJP.BaseData.SetBaseType();
+				$("#loginBut").click(function() {
+					//plus.nativeUI.showWaiting("正在登录中...");
+					var data = {
+						loginId: WJP.Tools.encryptByDES($('#username').val(), WJP.Static.paramKey),
+						loginPass: WJP.Tools.encryptByDES($('#password').val(), WJP.Static.paramKey),
+						memo: WJP.Tools.encryptByDES('', WJP.Static.paramKey)
+					};
+					alert(JSON.stringify(data)); 
+					$.ajax({
+						type:'post',
+						url: '122.225.201.35:95/NewAPI/BaseTypeService.asmx/ListBaseType',
+					    data: data,
+						async: false,
+						dataType:'json',
+						contentType: 'application/x-www-form-urlencoded',
+						error: function (XMLHttpRequest, textStatus, errorThrown) {
+               				 alert(XMLHttpRequest.status);
+							 alert(XMLHttpRequest.readyState);
+							 alert(textStatus);
+                          },
+						success: function(data) {
+							alert(data);
+							//alert(JSON.stringify(result));
+							//							plus.nativeUI.closeWaiting();
+							//							var isExist = false;
+							//							var wvs = plus.webview.all();
+							//							for(var i = 0; i < wvs.length; i++) {
+							//								var strId = wvs[i].id;
+							//								var strURL = wvs[i].getURL();
+							//								if(strId == 'layout.html' || strId == 'deal.html') {
+							//									isExist = true;
+							//									plus.webview.show(strId); // 显示窗口
+							//								}
+							//							}
+							//							if(!isExist) {
+							//								mui.openWindow({
+							//									url: 'layout.html',
+							//									id: 'layout.html'
+							//								});
+							//							}
+							//							WJP.User.Set();
+						},
+						//waitMsg: '正在登录中......'
+					})
+
+				})
+			});
+		</script>
+
+	</head>
+
+	<body class="loginBG">
+		<div style="width:100%;height: 40%;text-align:center; ">
+			<img src="images/project/ic_logo.png" style="width:65%;height:65px; margin-top: 28%;" />
+		</div>
+		<div style="color: white;height: 50%;">
+			<div style="margin: 30px;">
+				<div class="mui-input-row" style="height:55px;border-bottom:1px solid #C0C0C0; ">
+					<label style="width:36px;padding: 22px 2px 22px 0px;"><span class="mui-icon mui-icon-personadd"></span></label>
+					<input type="text" id='username' style="float: left;padding: 35px 15px;color: white;" class="mui-input-clear" placeholder="用户名">
+				</div>
+				<div class="mui-input-row" style="height:55px;border-bottom:1px solid #C0C0C0; ">
+					<label style="width:36px;padding: 22px 2px 22px 0px;"><span class="mui-icon mui-icon-locked"></span></label>
+					<input id='password' type="text" style="float: left;padding: 35px 15px;color: white;" class="mui-input-clear" placeholder="用户密码">
+				</div>
+				<div style="height:60px;">
+					<button id="loginBut" style="width: 100%;height: 45px;margin-top: 30px;" type="button" class="mui-btn mui-btn-primary">登 录</button>
+				</div>
+			</div>
+		</div>
+		<div style="text-align: center;color: white;font-size: 12px;">
+			全球领先文体产业整体集成方案解决商
+		</div>
+	</body>
+
+</html>

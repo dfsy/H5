@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<script src='../../js/mui.min.js'></script>
+		<script src='../../js/jquery-3.2.1.min.js'></script>
+		<script src='../../js/WJP/control.js'></script>
+		<script src='../../js/WJP/common.js'></script>
+		<script src='../../js/WJP/Init.js'></script>
+		<script src='../../js/encrypt/tripledes.js'></script>
+		<script src='../../js/encrypt/mode-ecb.js'></script>
+		<script src="../../js/mui.picker.all.js"></script>
+		<link href='../../css/mui.min.css' rel='stylesheet' />
+		<link href='../../css/style.css' rel='stylesheet' />
+		<link href="../../css/mui.picker.min.css" rel="stylesheet" />
+		<script>
+			mui.plusReady(function() {
+				var self = plus.webview.currentWebview(),
+					isAjax = false,
+					ProjectID = 0;
+				switch(self.type) {
+					case 1:
+						isAjax = true;
+						ProjectID = self.row.ID;
+						break;
+					case 2:
+						isAjax = true;
+						ProjectID = self.row.bussinessId;
+						break;
+				}
+				loadButton();
+				WJP.form.loadPage({
+					computeHei: {
+						$set: $("#centerDiv"),
+						attachHeigh: 103
+					},
+					focus: {
+						isFocus: true,
+						$reference: $('.wjp-bottom-bar'),
+						scrollFun: function() {
+							return $('#slider').find('.mui-active').attr('index');
+						}
+					},
+					$scroll: mui('.mui-scroll-wrapper'),
+					$pannel: $('#DivPanelByForm'),
+					isAjax: isAjax,
+					loadAfter: function(data) {
+						loadListCount();
+						if(data && data.项目信息 && data.项目信息.ID > 0) {
+							var str = WJP.Tools.IsNotEmpty(data.项目简称) ? data.项目简称 : '项目明细';
+							str += WJP.Tools.IsNotEmpty(data.销员姓名) ? '<span style="font-size:12px">(' + data.销员姓名 + ')</span>' : '';
+							$('#navTitle').html(str);
+						}
+					},
+					ajax: {
+						type: 'POST',
+						data: {
+							ProjectID: ProjectID
+						},
+						url: WJP.Static.CrmURL + 'GetProjectInfo'
+					}
+				});
+				$('#DoBack').on('click', function() {
+					self.close();
+				});
+				document.getElementById('slider').addEventListener('slide', function(e) {
+					$(":focus").each(function() {
+						$(this).blur();
+					})
+					//alert('1');
+					//					WJP.ComputeHeight({
+					//						$set: $("#centerDiv"),
+					//						attachHeigh: 103
+					//					});
+					//alert(mui(this).slider().getSlideNumber());
+					//				if(e.detail.slideNumber === 1) { //1说明是已办
+					//					if(!isClick) {
+					//						isClick = true;
+					//						loadData(2);
+					//					}
+					//				}
+				});
+				document.getElementById('slider').addEventListener('dragstart', function(e) {
+					//$(this).blur();
+				});
+
+			});
+
+			function loadListCount() {
+				$('[name="listCount"]').each(function(index) {
+					var $table = $('#' + $(this).attr('tableId'));
+					if($table && $table.length > 0) {
+						$(this).text('(' + $table.find('tbody tr[name!="nullTR"]').length + ')');
+					}
+				});
+			};
+
+			function editContact(row, $tr) {
+				mui.openWindow({
+					url: 'contact.html',
+					id: 'contact.html',
+					createNew: false,
+					extras: {
+						projectId: $('input[name="ID"]').val(),
+						row: row,
+						tableId: $tr.parent().parent().attr('id')
+					}
+				});
+			}
+
+			function addContact(type, tableId) {
+				mui.openWindow({
+					url: 'contact.html',
+					id: 'contact.html',
+					createNew: false,
+					extras: {
+						projectId: $('input[name="ID"]').val(),
+						type: type,
+						tableId: tableId
+					}
+				});
+			}
+
+			function toggleNext(tableid) {
+				$('#' + tableid).toggle();
+			}
+
+			function loadTable(tableId, data, result) {
+				var $table = $('#' + tableId);
+				if(data.ID > 0) {
+					$table.find('#' + data.ID).html('<td>' + data.PersonName + '</td><td>' + data.JobPosition + '</td><td>' + data.MB + '</td><td>' + data.InterestDesc + '</td>').unbind().click(function() {
+						editContact(data, $(this));
+					});
+				} else {
+					var $tr = $('<tr id="' + result.stateValue + '"><td>' + data.PersonName + '</td><td>' + data.JobPosition + '</td><td>' + data.MB + '</td><td>' + data.InterestDesc + '</td></tr>');
+					data.ID = result.stateValue;
+					$tr.click(function() {
+						editContact(data, $tr);
+					});
+					$table.find('tbody').append($tr);
+					$table.find('tr[name="nullTR"]').remove();
+					loadListCount();
+				}
+				mui.toast(result.stateMsg);
+			}
+			//type 0表示添加、1表示编辑、2表示代办
+			function loadButton() {
+				var self = plus.webview.currentWebview();
+				switch(self.type) {
+					case 0:
+					case 1:
+						$('#nar_btn_edit').show().siblings().hide();
+						break;
+					case 2:
+						var mode = -1,
+							isAudit = -1;
+						try {
+							mode = self.row.mode;
+							isAudit = self.row.isAudit
+						} catch(e) {
+							mode = -1;
+							isAudit = -1;
+						}
+						if(isAudit == 0) {
+							//0表示发起节点、1表示审核节点、2表示抄送节点、3表示会签节点、99表示结束节点
+							if(mode == 0) {
+								$('#nar_btn_Reture').show().siblings().hide();
+							} else if(mode == 1 || mode == 3) {
+								$('#nar_btn_Flow').show().siblings().hide();
+							} else if(mode == 2) {
+								$('#nar_btn_CC').show().siblings().hide();
+							} else {
+								$('#nar_btn_Close').show().siblings().hide();
+							}
+						} else {
+							$('#nar_btn_Close').show().siblings().hide();
+						}
+						break;
+				}
+			}
+		</script>
+		<style>
+			.projectTable {
+				border-top: 1px solid #CCCCCC;
+				border-bottom: 1px solid #ccc;
+				height: 40px;
+				background-color: #f1f1f1;
+				width: 100%;
+			}
+			
+			.projectTable .projectTitle {
+				border-bottom: 1px solid #CCCCCC;
+				text-align: center;
+				font-size: 12px;
+				font-weight: bolder;
+				line-height: 30px;
+			}
+			
+			.projectTable input {
+				font-size: 14px;
+				padding-left: 15px;
+				margin-bottom: 0px;
+				background-color: transparent;
+				border: 0px;
+			}
+			
+			.projectTable .projAdd {
+				width: 33px;
+				border-left: 1px solid #CCCCCC;
+				text-align: center;
+				font-size: 12px;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<div>
+			<header id="header" class="mui-bar wjp-bar-nav">
+				<a class="mui-icon mui-icon-undo" id='DoBack'></a>
+				<h1 id='navTitle' class="mui-title">项目明细</h1>
+			</header>
+			<div id='centerDiv' class="wjp-scroll-wrapper">
+				<div id="slider" class="mui-slider mui-fullscreen">
+					<div class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+						<a index='0' class="mui-control-item mui-active" href="#item1mobile">
+							基础
+						</a>
+						<a index='1' class="mui-control-item" href="#item2mobile">
+							关联
+						</a>
+						<a index='2' class="mui-control-item" href="#item3mobile">
+							产品
+						</a>
+						<a index='3' class="mui-control-item" href="#item4mobile">
+							其它
+						</a>
+						<a index='4' class="mui-control-item" href="#item5mobile">
+							评定
+						</a>
+						<a index='5' class="mui-control-item">
+							审核
+						</a>
+					</div>
+					<div name='excludeHeight' id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-2"></div>
+					<div id='DivPanelByForm' class="mui-slider-group">
+						<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+							<div class="mui-scroll-wrapper">
+								<div class="mui-scroll">
+									<form id="baseForm" class="mui-input-group">
+										<div class="mui-input-row">
+											<label>项目编号</label>
+											<span wjp='{"type":"span","jn":"项目信息.Code"}' type="text" class="wjprightinput">系统生成</span>
+											<input wjp='{"type":"input","jn":"项目信息.ID"}' type="hidden" name='ID' />
+										</div>
+										<!--<div class="mui-input-row">
+											<label>项目简称</label>
+											<input wjp='{"type":"input","jn":"项目信息.ProjectShortName"}' type="text" name='ProjectShortName' class="wjprightinput" placeholder="请输入项目简称">
+										</div>-->
+										<!--<div class="mui-input-row">
+											<label>项目来源</label>
+											<input wjp='{"type":"input","jn":"项目信息.ProjectSource"}' type="text" name='ProjectSource' class="wjprightinput" placeholder="请输入项目来源">
+										</div>-->
+										<div class="mui-input-row">
+											<label>项目名称 <b style="color: red;">*</b></label>
+											<input wjp='{"type":"input","jn":"项目名称"}' type="text" name='ProjectName' class="wjprightinput" placeholder="请输入项目名称">
+										</div>
+										<div class="mui-input-row">
+											<label>项目类型 <b style="color: red;">*</b></label>
+											<div wjp='{"type":"buttonSelecter","jn":"项目信息.ProjectType","EnumID":27}' class="wjprightinput" name='ProjectType'>请选择项目类型</div>
+										</div>
+
+										<div class="mui-input-row">
+											<label>投资单位 <b style="color: red;">*</b></label>
+											<div wjp='{"type":"buttonSelecter","jn":"项目信息.InvestUnitID","EnumID":29}' class="wjprightinput" name='InvestUnitID'>请选择投资单位</div>
+										</div>
+										<div class="mui-input-row">
+											<label>资金情况 <b style="color: red;">*</b></label>
+											<div wjp='{"type":"buttonSelecter","jn":"项目信息.FundConditionID","EnumID":30}' class="wjprightinput" name='FundConditionID'>请选择资金情况</div>
+										</div>
+										<div class="mui-input-row">
+											<label>项目地区 <b style="color: red;">*</b></label>
+											<div wjp='{"type":"addressSelecter","jn":["项目信息.ProvinceAreaID","项目信息.CityAreaID","项目信息.CountyAreaID"]}' class="wjprightinput" name='ProvinceAreaID,CityAreaID,CountyAreaID'>请选择项目地区</div>
+										</div>
+										<div class="mui-input-row">
+											<label>招标时间 <b style="color: red;">*</b></label>
+											<div wjp='{"type":"dateSelecter","jn":"项目信息.ProjectTenderTime","formatter":"yyyy-MM"}' class="wjprightinput" data-options='{"type":"month"}' name="ProjectTenderTime">请选择招标时间</div>
+										</div>
+										<div class="mui-input-row">
+											<label>立项时间 <b style="color: red;">*</b></label>
+											<div wjp='{"type":"dateSelecter","jn":"项目信息.ProjectTime","formatter":"yyyy-MM-dd"}' class="wjprightinput" data-options='{"type":"date"}' name="ProjectTime">请选择立项时间</div>
+										</div>
+										<!--<div class="mui-input-row">
+											<label>项目销员 <b style="color: red;">*</b></label>
+											<input wjp='{"type":"input","jn":"项目信息.UserID"}' type="text" class="wjprightinput"></input>
+										</div>-->
+
+										<div class="mui-input-row">
+											<label>项目概况 <b style="color: red;">*</b></label>
+											<textarea wjp='{"type":"textarea","jn":"项目信息.ProjectSituation"}' name='ProjectSituation' class="wjprightinput" placeholder="请输入项目概况"></textarea>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+						<div id="item2mobile" class="mui-slider-item mui-control-content">
+							<div class="mui-scroll-wrapper">
+								<div class="mui-scroll">
+									<form id="JoinForm">
+										<table style="border-top: 0px;" class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													工程中心信息 <span tableId='gcTable' name='listCount'>(0)</span>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<input wjp='{"type":"input","jn":"工程中心.info.CustomerName"}' type="text" placeholder="请输入工程中心名称">
+												</td>
+												<td class="projAdd">
+													<b onclick="addContact(1,'gcTable')" class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('gcTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"工程中心.list","columns":"PersonName,JobPosition,MB,InterestDesc","PK":"ID","callBack":"editContact"}' id='gcTable' class="table">
+											<thead>
+												<tr>
+													<td width="60px">联系人</td>
+													<td width="115px">职务</td>
+													<td width="85px">电话</td>
+													<td>倾向</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+										<table class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													使用单位信息 <span tableId='sydwTable' name='listCount'>(1)</span>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<input wjp='{"type":"input","jn":"使用单位.info.CustomerName"}' type="text" placeholder="请输入使用单位名称">
+												</td>
+												<td onclick="addContact(2,'sydwTable')" class="projAdd">
+													<b class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('sydwTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"使用单位.list","columns":"PersonName,JobPosition,MB,InterestDesc","PK":"ID","callBack":"editContact"}' id='sydwTable' class="table" style="border: 0px solid transparent !important;">
+											<thead>
+												<tr>
+													<td width="60px">联系人</td>
+													<td width="115px">职务</td>
+													<td width="85px">电话</td>
+													<td>倾向</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+										<table class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													招标主管单位 <span tableId='zbzgdwTable' name='listCount'>(0)</span>
+												</td>
+											</tr>
+											<tr>
+
+												<td>
+													<input wjp='{"type":"input","jn":"招标主管单位.info.PartName"}' type="text" placeholder="请输入招标主管单位名称">
+												</td>
+												<td class="projAdd">
+													<b onclick="addContact(3,'zbzgdwTable')" class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('zbzgdwTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"招标主管单位.list","columns":"PersonName,JobPosition,MB,InterestDesc","PK":"ID","callBack":"editContact"}' id='zbzgdwTable' class="table" style="border: 0px solid transparent !important;">
+											<thead>
+												<tr>
+													<td width="60px">联系人</td>
+													<td width="115px">职务</td>
+													<td width="85px">电话</td>
+													<td>倾向</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+										<table class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													设计单位信息 <span tableId='sjdwTable' name='listCount'>(0)</span>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<input wjp='{"type":"input","jn":"设计单位.info.PartName"}' type="text" placeholder="请输入设计单位名称">
+												</td>
+												<td class="projAdd">
+													<b onclick="addContact(4,'sjdwTable')" class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('sjdwTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"设计单位.list","columns":"PersonName,JobPosition,MB,InterestDesc","PK":"ID","callBack":"editContact"}' id='sjdwTable' class="table" style="border: 0px solid transparent !important;">
+											<thead>
+												<tr>
+													<td width="60px">联系人</td>
+													<td width="115px">职务</td>
+													<td width="85px">电话</td>
+													<td>倾向</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+										<table class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													专家顾问信息 <span tableId='zjgwTable' name='listCount'>(0)</span>
+												</td>
+											</tr>
+											<tr>
+
+												<td height="35px">
+
+												</td>
+												<td class="projAdd">
+													<b onclick="addContact(5,'zjgwTable')" class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('zjgwTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"专家顾问.list","columns":"PersonName,JobPosition,MB,InterestDesc","PK":"ID","callBack":"editContact"}' id='zjgwTable' class="table" style="border: 0px solid transparent !important;">
+											<thead>
+												<tr>
+													<td width="60px">联系人</td>
+													<td width="115px">职务</td>
+													<td width="85px">电话</td>
+													<td>倾向</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+										<table class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													招标经办单位 <span tableId='zbjbdwTable' name='listCount'>(0)</span>
+												</td>
+											</tr>
+											<tr>
+
+												<td>
+													<input wjp='{"type":"input","jn":"招标经办单位.info.PartName"}' type="text" placeholder="请输入招标经办单位">
+												</td>
+												<td class="projAdd">
+													<b onclick="addContact(6,'zbjbdwTable')" class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('zbjbdwTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"招标经办单位.list","columns":"PersonName,JobPosition,MB,InterestDesc","PK":"ID","callBack":"editContact"}' id='zbjbdwTable' class="table">
+											<thead>
+												<tr>
+													<td width="60px">联系人</td>
+													<td width="115px">职务</td>
+													<td width="85px">电话</td>
+													<td>倾向</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+										<table class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													预测业主评委 <span tableId='ycyzbwTable' name='listCount'>(0)</span>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<input wjp='{"type":"input","jn":"预测业主评委.info.PartName"}' type="text" placeholder="请输入预测业主评委">
+												</td>
+												<td class="projAdd">
+													<b onclick="addContact(7,'ycyzbwTable')" class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('ycyzbwTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"预测业主评委.list","columns":"PersonName,JobPosition,MB,InterestDesc","PK":"ID","callBack":"editContact"}' id='ycyzbwTable' class="table">
+											<thead>
+												<tr>
+													<td width="60px">联系人</td>
+													<td width="115px">职务</td>
+													<td width="85px">电话</td>
+													<td>倾向</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+										<table class="projectTable">
+											<tr>
+												<td class="projectTitle" colspan="3">
+													竞争单位信息 <span tableId='jzdwTable' name='listCount'>(0)</span>
+												</td>
+											</tr>
+											<tr>
+												<td height="35px">
+
+												</td>
+												<td class="projAdd">
+													<b onclick="addCompete()" class="mui-icon mui-icon-plusempty"></b>
+												</td>
+												<!--<td class="projAdd">
+													<b onclick="toggleNext('jzdwTable')" class="mui-icon mui-icon-arrowdown"></b>
+												</td>-->
+											</tr>
+										</table>
+										<table wjp='{"type":"table","jn":"竞争单位.list","columns":"CompanyName,DoneInfo,Memo","PK":"ID","callBack":"editCompete"}' id='jzdwTable' class="table">
+											<thead>
+												<tr>
+													<td>竞争单位</td>
+													<td>优势</td>
+													<td>备注</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr name="nullTR">
+													<td style="height:45px;color:gray" colspan="4">未添加任何数据......</td>
+												</tr>
+											</tbody>
+										</table>
+
+								</div>
+							</div>
+						</div>
+						<div id="item3mobile" class="mui-slider-item mui-control-content">
+							<div class="mui-scroll-wrapper">
+								<div class="mui-scroll">
+
+								</div>
+							</div>
+						</div>
+						<div id="item4mobile" class="mui-slider-item mui-control-content">
+							<div class="mui-scroll-wrapper">
+								<div class="mui-scroll">
+								</div>
+							</div>
+						</div>
+						<div id="item5mobile" class="mui-slider-item mui-control-content">
+							<div class="mui-scroll-wrapper">
+								<div class="mui-scroll">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="mui-bar mui-bar-tab mui-content wjp-bottom-bar" style="padding:0px;">
+				<div style="display: none;" id="nar_btn_edit" class="mui-row">
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-primary">保 存</button>
+					</div>
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-warning">提 交</button>
+					</div>
+					<!--<div class="mui-col-sm-4 mui-col-xs-4">
+						<button class="mui-btn-warning">关 闭</button>
+					</div>-->
+				</div>
+				<div style="display: none;" id="nar_btn_FlowInfo" class="mui-row">
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-primary">保 存</button>
+					</div>
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-warning">查看审批意见</button>
+					</div>
+					<!--<div class="mui-col-sm-4 mui-col-xs-4">
+						<button class="mui-btn-warning">关 闭</button>
+					</div>-->
+				</div>
+				<div style="display: none;" id="nar_btn_CC" class="mui-row">
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-primary">已 阅</button>
+					</div>
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-warning">关 闭</button>
+					</div>
+				</div>
+				<div style="display: none;" id="nar_btn_Flow" class="mui-row">
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-primary">审 核</button>
+					</div>
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-warning">关 闭</button>
+					</div>
+				</div>
+				<div style="display: none;" id="nar_btn_Reture" class="mui-row">
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-primary">重新提交</button>
+					</div>
+					<div class="mui-col-sm-6 mui-col-xs-6">
+						<button class="mui-btn-warning">关 闭</button>
+					</div>
+				</div>
+				<div style="display: none;" id="nar_btn_Close" class="mui-row">
+					<div class="mui-col-sm-12 mui-col-xs-12">
+						<button class="mui-btn-warning">关 闭</button>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!--<div style="display: none;" class="rwpMidLoading">
+			<div>数据加载中....</div>
+		</div>-->
+	</body>
+	<script>
+	</script>
+
+</html>

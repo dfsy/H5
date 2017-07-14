@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<script src='js/jquery-3.2.1.min.js'></script>
+		<script src="js/WJP/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.plusReady(function() {
+				WJP.BaseData.SetAddress();
+				WJP.BaseData.SetBaseType();
+				if(WJP.User.IsNotLogin()) {
+					mui.openWindow({
+						url: 'login.html',
+						id: 'login.html'
+					});
+				} else {
+					mui.openWindow({
+						url: 'layout.html',
+						id: 'layout.html'
+					})
+				};
+				//self.close();
+			});
+		</script>
+	</head>
+
+	<body>
+	</body>
+
+</html>

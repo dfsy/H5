@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<script src='../../js/mui.min.js'></script>
+		<script src='../../js/jquery-3.2.1.min.js'></script>
+		<script src='../../js/WJP/control.js'></script>
+		<script src='../../js/WJP/common.js'></script>
+		<script src='../../js/WJP/Init.js'></script>
+		<link href='../../css/mui.min.css' rel='stylesheet' />
+		<link href='../../css/style.css' rel='stylesheet' />
+		<title></title>
+		<script>
+			mui.plusReady(function() {
+				var self = plus.webview.currentWebview();
+				var pid = self.projectId,
+					typeID = self.type,
+					tableId = self.tableId;
+				if(!WJP.Tools.IsJson(self.row)) {
+					self.row = {};
+					self.row.ProjectID = pid;
+					self.row.TypeID = typeID;
+				}
+				WJP.form.loadPage({
+					$pannel: $('#contactForm'),
+					isAjax: false,
+					data: self.row
+				});
+				$('[name="closeView"]').on('click', function() {
+					self.close();
+				});
+				$('#btnSave').on('click', function() {
+					WJP.form.submit({
+						$form: $('#contactForm'),
+						url: WJP.Static.CrmURL + 'OPContactDetails',
+						success: function(result, data) {
+							self.close();
+							var webView = plus.webview.getWebviewById('business-project-info.html');
+							webView.evalJS('loadTable("' + tableId + '",' + JSON.stringify(data) + ',' + JSON.stringify(result) + ');');
+
+						}
+					});
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<header style="height: 60px;" id="header" class="mui-bar mui-bar-nav">
+			<a style="color:white;" class="mui-btn mui-btn-blue mui-btn-link mui-pull-left" name="closeView"><span class="mui-icon mui-icon-undo"></span></a>
+			<h1 id='navTitle' style="color:white; text-align: center;" class="mui-title">
+				联系人信息  
+			</h1>
+		</header>
+		<div class="mui-collapse-content">
+			<form id="contactForm" class="mui-input-group wjp-scroll-wrapper">
+				<div class="mui-input-row">
+					<label>联系人<b style="color: red;">*</b></label>
+					<input wjp='{"type":"input","jn":"PersonName"}' type="text" name="PersonName" placeholder="请填写联系人" />
+					<input wjp='{"type":"input","jn":"ID"}' type="hidden" name="ID" />
+					<input wjp='{"type":"input","jn":"ProjectID","vali":{"type":"int","msg":"ProjectID参数非法"}}' type="hidden" name="ProjectID" />
+					<input wjp='{"type":"input","jn":"TypeID","vali":{"type":"int","msg":"TypeID参数非法"}}' type="hidden" name="TypeID" />
+				</div>
+				<div class="mui-input-row">
+					<label>职  务</label>
+					<input wjp='{"type":"input","jn":"JobPosition"}' type="text" name="JobPosition" placeholder="请填写职务" />
+				</div>
+				<div class="mui-input-row">
+					<label>电  话</label>
+					<input wjp='{"type":"input","jn":"MB"}' type="text" name="MB" placeholder="请填写电话" />
+				</div>
+				<div class="mui-input-row">
+					<label>倾  向</label>
+					<input wjp='{"type":"input","jn":"InterestDesc"}' type="text" name="InterestDesc" placeholder="请填写倾向" />
+				</div>
+			</form>
+		</div>
+
+		<div class="mui-bar mui-bar-tab mui-content wjp-bottom-bar" style="padding:0px;">
+			<div class="mui-row">
+				<div class="mui-col-sm-6 mui-col-xs-6">
+					<button style="top:0px;font-size: 16px;" class="mui-btn mui-btn-primary" id='btnSave'>保存</button>
+				</div>
+				<div class="mui-col-sm-6 mui-col-xs-6">
+					<button name="closeView" style="top:0px;font-size: 16px;" class="mui-btn mui-btn-warning">关闭</button>
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>

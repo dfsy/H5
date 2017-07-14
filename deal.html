@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<script src="js/WJP/PageJS.js"></script>
+		<style>
+			.mui-table-view-cell p {
+				color: black;
+				font-size: 14px;
+				line-height: 25px;
+			}
+		</style>
+		<script type="text/javascript" charset="utf-8">
+			//			$(function() {
+			//				WJP.ComputeHeight({
+			//					$set: $(".mui-control-content"),
+			//					$Exclude: $("[name='excludeHeight']"),
+			//					attachHeigh: 0
+			//				});
+			//			})
+			mui.plusReady(function() {
+				//alert(plus.webview.getLaunchWebview().id);
+				mui('.mui-scroll-wrapper').scroll({
+					indicators: true //是否显示滚动条slider
+				});
+				$('#searchFlow').keydown(function(e) {
+					if(e.keyCode == 13) {
+						var index = mui('#slider').slider().getSlideNumber();
+						$(this).blur();
+						loadData(index);
+					}
+				})
+				var isClick = false;
+				WJP.ComputeHeight({
+					$set: $(".mui-control-content"),
+					$Exclude: $("[name='excludeHeight']"),
+					attachHeigh: 0
+				});
+				$(window).resize(function() {
+					WJP.ComputeHeight({
+						$set: $(".mui-control-content"),
+						$Exclude: $("[name='excludeHeight']"),
+						attachHeigh: 0
+					});
+				});
+				loadData(0);
+				document.getElementById('slider').addEventListener('slide', function(e) {
+					if(e.detail.slideNumber === 1) { //1说明是已办
+						if(!isClick) {
+							isClick = true;
+							loadData(1);
+						}
+					}
+				});
+			});
+
+			function openBus(json) {
+				var url = '',
+					id = '';
+				switch(json.templateInfoId) {
+					case 1010: //申报
+						url = '/business/project/info.html';
+						id = 'business-project-info.html'
+						break;
+					case 1011: //配合
+						//url = '/business/project/info.html';
+						//id = 'business-project-info.html'
+						break;
+				}
+				if(WJP.Tools.IsNotEmpty(url)) {
+					mui.openWindow({
+						url: url,
+						id: id,
+						createNew: false,
+						extras: {
+							type: 2,
+							row: json
+						}
+					});
+				} else {
+					mui.toast('参数错误!!!')
+				}
+			}
+
+			//0表示待办，1表示已办
+			function loadData(type) {
+				var taskStr = type == 0 ? 'getDealts' : 'getComplete',
+					$p = type == 0 ? $('#dealP') : $('#dealOverP'),
+					$panel = type == 0 ? $('#dealPanel') : $('#dealOverPanel'),
+					msg = type == 0 ? '获取代办中' : '获取已办中',
+					userName = $('#searchFlow').val();
+				WJP.Tools.Ajax({
+					Url: WJP.Static.FlowURL + taskStr,
+					data: {
+						empId: '432',
+						sendName: userName
+					},
+					success: function(data) {
+						if(WJP.Tools.IsJson(data) && data.total > 0) {
+							$p.hide();
+							var str = '<ul class="mui-table-view mui-table-view-striped mui-table-view-condensed">'
+							for(var i = 0; i < data.rows.length; i++) {
+								var json = data.rows[i];
+								str += '<li onclick=\'openBus(' + JSON.stringify(json) + ')\' class="mui-table-view-cell">' +
+									'<p style="font-size:12px">' + json.templateInfoTitle + '--' + json.sendName + '</p>' +
+									'<p style="font-size:16px" class="mui-h6 mui-ellipsis-2">' + json.bussinessTitle + '(' + json.bussinessCode + ')</p>' +
+									'</li>'
+							}
+							str += '</ul>';
+							$panel.html(str);
+						} else {
+							$p.show();
+							$panel.html('');
+						}
+					},
+					waitMsg: msg
+				});
+			}
+		</script>
+	</head>
+
+	<body style="background-color: white;">
+
+		<style>
+			.mui-control-content {
+				background-color: white;
+			}
+			
+			.mui-control-content .mui-loading {
+				/*margin-top: 50px;*/
+			}
+		</style>
+		<div class="mui-content">
+			<div id='heitest' name='excludeHeight' style="background-color: white;">
+				<div style="width: 100%; text-align:center;color:#007aff;padding-top:15px;">
+					<h2>6月6号 周二</h2></div>
+				<div style="width: 100%; text-align:center; padding-top:3px;"><span style="font-size:12PX;" class="mui-icon mui-icon-gear">吴俊鹏：欢迎您</span></div>
+
+			</div>
+			<div id="slider" class="mui-slider">
+				<div style="background-color: white;" name='excludeHeight' class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+					<a class="mui-control-item mui-active" href="#item1mobile">
+						待办流程
+					</a>
+					<a class="mui-control-item" href="#item2mobile">
+						已办流程
+					</a>
+
+					<a class="mui-control-item" style="text-align: left;">
+
+					</a>
+				</div>
+				<div name='excludeHeight' id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-4"></div>
+				<div name='excludeHeight' class="mui-input-row mui-search">
+					<input style="background-color: white;margin-bottom:0px" type="search" id='searchFlow' class="mui-input-clear" placeholder="搜索流程">
+				</div>
+				<div class="mui-slider-group">
+					<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+						<div id="scroll1" class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+
+								<p id='dealP' style="text-align: center; padding-top: 30px;">暂无任何待办数据</p>
+								<div id='dealPanel'>
+
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="item2mobile" class="mui-slider-item mui-control-content">
+						<div id="scroll2" class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<p id='dealOverP' style="text-align: center; padding-top: 30px;">暂无任何已办数据</p>
+								<div id='dealOverPanel'>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+	</body>
+
+</html>

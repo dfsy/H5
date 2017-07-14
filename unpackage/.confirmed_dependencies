@@ -1,0 +1,230 @@
+{
+  "main.html": {
+    "resources": [
+      "js/mui.min.js",
+      "fonts/mui.ttf",
+      "css/mui.min.css",
+      "js/WJP/Init.js",
+      "bottom.html",
+      "js/jquery-3.0.0.min.js",
+      "js/WJP/common.js",
+      "css/style.css"
+    ],
+    "refer": [
+      "bottom.html",
+      "login.html"
+    ]
+  },
+  "bottom.html": {
+    "resources": [
+      "css/mui.min.css",
+      "login.html"
+    ],
+    "refer": [
+      "login.html"
+    ]
+  },
+  "login.html": {
+    "resources": [
+      "js/app.js",
+      "images/sinaweibo.png",
+      "css/mui.min.css",
+      "css/style.css",
+      "images/weixin.png",
+      "images/qq.png",
+      "js/mui.enterfocus.js",
+      "images/project/bg_login.jpg",
+      "images/project/ic_logo.png",
+      "js/jquery-3.0.0.min.js",
+      "fonts/mui.ttf",
+      "/js/WJP/Init.js",
+      "/js/mui.min.js",
+      "/js/jquery-3.0.0.min.js",
+      "js/WJP/PageJS.js",
+      "/js/WJP/common.js",
+      "/css/mui.min.css",
+      "js/jquery-3.2.1.min.js",
+      "js/WJP/control.js",
+      "js/encrypt/mode-ecb.js",
+      "js/encrypt/tripledes.js",
+      "js/WJP/Init.js",
+      "js/WJP/common.js",
+      "js/mui.min.js",
+      "images/loading/imgLoading2.gif"
+    ],
+    "refer": [
+      "main.html",
+      "layout.html"
+    ]
+  },
+  "init.html": {
+    "resources": [
+      "js/WJP/common.js",
+      "js/mui.min.js",
+      "js/WJP/Init.js",
+      "js/jquery-3.2.1.min.js"
+    ],
+    "refer": [
+      "login.html",
+      "layout.html"
+    ]
+  },
+  "layout.html": {
+    "resources": [
+      "main.html",
+      "css/mui.min.css",
+      "js/jquery-3.0.0.min.js",
+      "fonts/mui.ttf",
+      "js/WJP/PageJS.js",
+      "css/style.css",
+      "js/jquery-3.2.1.min.js",
+      "deal.html",
+      "js/WJP/common.js",
+      "js/mui.min.js",
+      "js/WJP/Init.js",
+      "js/WJP/control.js",
+      "js/encrypt/mode-ecb.js",
+      "js/encrypt/tripledes.js"
+    ],
+    "refer": [
+      "main.html",
+      "deal.html",
+      "project.html",
+      "user.html"
+    ]
+  },
+  "deal.html": {
+    "resources": [
+      "css/mui.min.css",
+      "css/style.css",
+      "js/WJP/common.js",
+      "js/mui.min.js",
+      "js/jquery-3.2.1.min.js",
+      "js/WJP/PageJS.js",
+      "js/WJP/Init.js",
+      "images/loading/imgLoading2.gif"
+    ],
+    "refer": [
+      "business/project/info.html"
+    ]
+  },
+  "project.html": {
+    "resources": [
+      "css/mui.min.css",
+      "images/project/ic_crm_resource.png",
+      "css/style.css"
+    ],
+    "refer": [
+      "business/project/list.html",
+      "reg.html"
+    ]
+  },
+  "reg.html": {
+    "resources": [
+      "js/app.js",
+      "css/mui.min.css"
+    ],
+    "refer": []
+  },
+  "business/project/list.html": {
+    "resources": [
+      "css/mui.min.css",
+      "css/style.css",
+      "js/WJP/common.js",
+      "js/mui.min.js",
+      "fonts/mui.ttf",
+      "js/jquery-3.2.1.min.js",
+      "js/WJP/Init.js",
+      "js/WJP/control.js",
+      "js/encrypt/mode-ecb.js",
+      "js/encrypt/tripledes.js",
+      "images/loading/imgLoading2.gif",
+      "images/loading/5-121204193957.gif",
+      "js/mui.picker.min.js",
+      "js/mui.picker.all.js",
+      "css/mui.picker.min.css"
+    ],
+    "refer": [
+      "business/project/info.html"
+    ]
+  },
+  "business/project/test.html": {
+    "resources": [
+      "js/mui.picker.js",
+      "js/mui.min.js",
+      "js/mui.poppicker.js",
+      "css/mui.poppicker.css",
+      "css/mui.picker.css",
+      "css/mui.picker.min.css",
+      "js/mui.picker.all.js",
+      "js/WJP/common.js",
+      "js/encrypt/mode-ecb.js",
+      "css/mui.min.css",
+      "css/style.css",
+      "js/jquery-3.2.1.min.js",
+      "js/WJP/Init.js",
+      "js/WJP/control.js",
+      "js/angular.min.js",
+      "js/encrypt/tripledes.js"
+    ],
+    "refer": []
+  },
+  "business/project/info.html": {
+    "resources": [
+      "css/mui.min.css",
+      "css/style.css",
+      "css/mui.picker.min.css",
+      "js/WJP/common.js",
+      "js/encrypt/mode-ecb.js",
+      "js/mui.min.js",
+      "fonts/mui.ttf",
+      "js/jquery-3.2.1.min.js",
+      "js/WJP/Init.js",
+      "js/WJP/control.js",
+      "js/mui.picker.all.js",
+      "js/encrypt/tripledes.js",
+      "business/project/info.html",
+      "images/loading/5-121204193957.gif",
+      "images/loading/imgLoading1.gif",
+      "images/loading/imgLoading2.gif",
+      "js/angular.min.js",
+      "js/WJP/city.data-3.js"
+    ],
+    "refer": [
+      "business/project/info.html",
+      "setting.html",
+      "business/project/contact.html"
+    ]
+  },
+  "setting.html": {
+    "resources": [
+      "js/app.js",
+      "libs/easymob-webim-sdk/easemob.im-1.0.5.js",
+      "css/mui.min.css",
+      "libs/easymob-webim-sdk/json2.js",
+      "libs/easymob-webim-sdk/jquery-1.11.1.js",
+      "js/mui.locker.js",
+      "js/feedback.js",
+      "css/feedback-page.css",
+      "js/feedback-page.js",
+      "libs/easymob-webim-sdk/strophe-custom-2.0.0.js",
+      "js/mui.view.js",
+      "images/iconfont-tianjia.png"
+    ],
+    "refer": []
+  },
+  "user.html": {
+    "resources": [
+      "css/mui.min.css",
+      "css/style.css"
+    ],
+    "refer": []
+  },
+  "business/project/contact.html": {
+    "resources": [
+      "css/mui.min.css",
+      "css/style.css"
+    ],
+    "refer": []
+  }
+}
