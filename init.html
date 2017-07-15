@@ -11,6 +11,7 @@
 			mui.plusReady(function() {
 				WJP.BaseData.SetAddress();
 				WJP.BaseData.SetBaseType();
+				
 				if(WJP.User.IsNotLogin()) {
 					mui.openWindow({
 						url: 'login.html',

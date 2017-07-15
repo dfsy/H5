@@ -21,7 +21,7 @@
 	</head>
 	<style>
 		.mui-popover {
-			height: 60%;
+			height: 100%;
 			width: 97%;
 			background-color: white;
 		}
@@ -78,7 +78,7 @@
 					});
 				}
 			});
-			$('#searchDataGrid').on('click', function() {
+			$('#').on('click', function() {
 				mui('.mui-popover').popover('hide');
 				WJP.form.search({
 					$form: $('#searchForm'),
@@ -120,7 +120,7 @@
 				mui.openWindow({
 					url: 'info.html',
 					id: 'business-project-info.html',
-					createNew: false,
+					createNew: true,
 					extras: {
 						type: 0
 					}
@@ -139,9 +139,9 @@
 				<a class="mui-icon mui-icon-undo" id='DoBack'></a>
 				<h1 id='navTitle' class="mui-title">项目管理</h1>
 				<a id='addInfo' style="font-size:38px;padding-top:2px;" class="mui-icon mui-icon-plusempty mui-pull-right"></a>
-				<a class="mui-icon mui-icon-search mui-pull-right" href="#topPopover"></a>
+				<a class="mui-icon mui-icon-search mui-pull-right" href="#"></a>
 			</header>
-			<div id="topPopover" class="mui-popover mui-scroll-wrapper">
+			<div id="" class="mui-popover mui-scroll-wrapper">
 				<div class="mui-scroll">
 					<form style="overflow: auto;" id='searchForm' class="mui-scroll mui-input-group">
 						<div class="mui-input-row">
